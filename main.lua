@@ -242,10 +242,10 @@ function love.update(dt)
     --Then changing the position also so that is appears on the right side of the character
     if (player.facing == "right") then
       newSkull.x = player.x + 70
-      newSkull.dx = 350
+      newSkull.dx = 450
     elseif (player.facing == "left") then
       newSkull.x = player.x - 80
-      newSkull.dx = -350
+      newSkull.dx = -450
     end
 
     table.insert(skulls, newSkull)
