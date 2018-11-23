@@ -357,26 +357,29 @@ function love.update(dt)
   end
 
   --ENEMIES AND PLAYER DETECTION
-  for i, enemy in ipairs(enemies) do
-    if player.facing == "right" then
 
-      if ((enemy.x - player.x > -30) and (enemy.x - player.x < 80) and (player.y - enemy.y > -1*player.height + jumpHandicap) and (player.y - enemy.y < player.height- jumpHandicap)) then
-        table.remove(enemies, i)
+  if player.isAlive then
+    for i, enemy in ipairs(enemies) do
+      if player.facing == "right" then
 
-        death()
-        print("ZOINKS SCOOB")
+        if ((enemy.x - player.x > -30) and (enemy.x - player.x < 80) and (player.y - enemy.y > -1*player.height + jumpHandicap) and (player.y - enemy.y < player.height- jumpHandicap)) then
+          table.remove(enemies, i)
+
+          death()
+          print("ZOINKS SCOOB")
+        end
+
+
+      elseif player.facing == "left" then
+
+        if ((enemy.x - player.x > -80) and (enemy.x - player.x < 30) and (player.y - enemy.y > -1*player.height + jumpHandicap) and (player.y - enemy.y < player.height- jumpHandicap)) then
+          table.remove(enemies, i)
+
+          death()
+          print("ZOINKS SCOOB")
+        end
+
       end
-
-
-    elseif player.facing == "left" then
-
-      if ((enemy.x - player.x > -80) and (enemy.x - player.x < 30) and (player.y - enemy.y > -1*player.height + jumpHandicap) and (player.y - enemy.y < player.height- jumpHandicap)) then
-        table.remove(enemies, i)
-
-        death()
-        print("ZOINKS SCOOB")
-      end
-
     end
   end
 
