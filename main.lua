@@ -34,6 +34,8 @@ createEnemyTimerMax = 9
 createEnemyTimer = createEnemyTimerMax
 createEnemy = false
 
+jumpHandicap = 50
+
 function tablelength(T) -- Stolen code to find length of table
   local count = 0
   for _ in pairs(T) do count = count + 1 end
@@ -302,6 +304,47 @@ function love.update(dt)
       enemy.x = enemy.x + enemy.dx * dt
     end
   end
+
+--COLLISION DETECTION
+
+--SKULLS & ENEMIES DETECTION
+  for i, skull in ipairs(skulls) do
+    for j, enemy in ipairs(enemies) do
+      if ((skull.x - enemy.x > -10) and (skull.x - enemy.x < 10) and (skull.y - enemy.y > -5) and (skull.y - enemy.y < 75)) then
+        table.remove(skulls, i)
+        table.remove(enemies, j)
+      end
+    end
+  end
+
+  --ENEMIES AND PLAYER DETECTION
+  for i, enemy in ipairs(enemies) do
+    if player.facing == "right" then
+
+      if ((enemy.x - player.x > -30) and (enemy.x - player.x < 80) and (player.y - enemy.y > -1*player.height + jumpHandicap) and (player.y - enemy.y < player.height- jumpHandicap)) then
+        table.remove(enemies, i)
+
+        --Define a function and stuff that handles death
+
+        print("ZOINKS SCOOB")
+      end
+
+
+    elseif player.facing == "left" then
+
+      if ((enemy.x - player.x > -80) and (enemy.x - player.x < 30) and (player.y - enemy.y > -1*player.height + jumpHandicap) and (player.y - enemy.y < player.height- jumpHandicap)) then
+        table.remove(enemies, i)
+
+        --Define a function and stuff that handles death
+
+
+        print("ZOINKS SCOOB")
+      end
+
+    end
+  end
+
+--END OF COLLISION DETECTION
 
   function removeSkulls() -- Handling the deletion of skulls off screen
 
