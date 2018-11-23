@@ -233,7 +233,7 @@ function love.update(dt)
 
 
   --Shooting, creating new skulls
-  if love.keyboard.isDown('space') and canShoot then
+  if love.keyboard.isDown('space') and canShoot and player.isAlive then
     newSkull = { x = null, y = player.y, dx = null, rotation = 0}
 
     --positive dx if facing right, negative if Left
