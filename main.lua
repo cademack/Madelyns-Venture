@@ -2,7 +2,7 @@ debug = true
 --Turn to false at release lol
 scale = 3
 
-player = { x = 0, y = 0, state = "idle", idleImg = null, idleImgs = {}, runImgs = {}, width = 0, height = 0, facing = "right"}
+player = { x = 0, y = 0, state = "idle", idleImg = null, idleImgs = {}, runImgs = {}, width = 0, height = 0, facing = "right", isAlive = true}
 dy = 0
 dx = 0
 defaultY = 0
@@ -36,6 +36,8 @@ createEnemy = false
 
 jumpHandicap = 50
 enemyTurnDistance = 80
+
+font = love.graphics.newFont("font.ttf", 64)
 
 function tablelength(T) -- Stolen code to find length of table
   local count = 0
@@ -78,6 +80,10 @@ end
 --XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 function love.load(arg)
+
+  font = love.graphics.newFont("font.ttf", 64)
+  love.graphics.setFont(font)
+
   player.idleImg = love.graphics.newImage('assets/player.png')
   player.x = love.graphics:getWidth()/2
   player.y = love.graphics:getHeight() - player.idleImg:getHeight() * scale
@@ -112,57 +118,36 @@ end
 function love.draw()
 
 --DRAWING THE PLAYER
-  if (player.facing == "right") then
-    if (dx ~= 0)  and (player.y > defaultY - 3) then --This checks if the horizontal speed is not zero and the player is low enough
-      love.graphics.draw(player.runImgs[math.floor((runFrame/runSpeed)+1.0)], player.x, player.y, 0, scale)
+  if player.isAlive == true then
 
-      if (runFrame < (4*runSpeed -1)) then --If runFrame is not at max, then increment. otherwise reset it
-        runFrame = runFrame + 1
+    if (player.facing == "right") then
+      if (dx ~= 0)  and (player.y > defaultY - 3) then --This checks if the horizontal speed is not zero and the player is low enough
+        love.graphics.draw(player.runImgs[math.floor((runFrame/runSpeed)+1.0)], player.x, player.y, 0, scale)
+
       else
-        runFrame = 1
+        --This happens when not running
+        love.graphics.draw(player.idleImgs[math.floor((runFrame/runSpeed)+1.0)], player.x, player.y, 0, scale)
+
       end
+    elseif (player.facing == "left") then
+      if (dx ~= 0) and (player.y > defaultY - 3) then -- same as before, but horizontally flipped
+        love.graphics.draw(player.runImgs[math.floor((runFrame/runSpeed)+1.0)], player.x, player.y, 0, -1*scale, scale)
 
-    else
-      --This happens when not running
-      love.graphics.draw(player.idleImgs[math.floor((runFrame/runSpeed)+1.0)], player.x, player.y, 0, scale)
-
-      if (runFrame < (4*runSpeed -1)) then --If runFrame is not at max, then increment. otherwise reset it
-        runFrame = runFrame + 1
       else
-        runFrame = 1
-      end
+        --This happens when not running
+        love.graphics.draw(player.idleImgs[math.floor((runFrame/runSpeed)+1.0)], player.x, player.y, 0, -1*scale, scale)
 
+      end
     end
-  elseif (player.facing == "left") then
-    if (dx ~= 0) and (player.y > defaultY - 3) then -- same as before, but horizontally flipped
-      love.graphics.draw(player.runImgs[math.floor((runFrame/runSpeed)+1.0)], player.x, player.y, 0, -1*scale, scale)
 
-      if (runFrame < (4*runSpeed -1)) then --If runFrame is not at max, then increment. otherwise reset it
-        runFrame = runFrame + 1           --Run frame represents the index of the runImgs table so that the character
-      else                                  -- tabs through each frame and is animated nice
-        runFrame = 1
-      end
-
-    else
-      --This happens when not running
-      love.graphics.draw(player.idleImgs[math.floor((runFrame/runSpeed)+1.0)], player.x, player.y, 0, -1*scale, scale)
-
-      if (runFrame < (4*runSpeed -1)) then --If runFrame is not at max, then increment. otherwise reset it
-        runFrame = runFrame + 1
-      else
-        runFrame = 1
-      end
-
-    end
   end
 --FINISHED DRAWING THE PLAYER
 
 
-
 --DRAWING THE STAFF
-  if (player.facing == "left") then
+  if (player.facing == "left" and player.isAlive) then
     love.graphics.draw(staffImg, player.x-player.width -5, player.y + 30 - math.floor(runFrame/2), 0, 0.5*scale)
-  else if (player.facing == "right") then
+  else if (player.facing == "right") and player.isAlive then
     love.graphics.draw(staffImg, player.x+player.width - 9, player.y + 30 - math.floor(runFrame/2), 0, 0.5*scale)
   end
   end
@@ -185,9 +170,22 @@ function love.draw()
     end
   end
 
---End of Draw
+  if (runFrame < (4*runSpeed -1)) then --If runFrame is not at max, then increment. otherwise reset it
+    runFrame = runFrame + 1
+  else
+    runFrame = 1
+  end
+
+  --Drawing death/respawn stuff
+  if not(player.isAlive) then
+    love.graphics.print("Press R to Restart!", 50, 50, 0, 1, 1)
+  end
+
 
 -- print() -- For debug reasons
+
+--End of Draw
+
 end
 
 function love.update(dt)
@@ -251,6 +249,17 @@ function love.update(dt)
     table.insert(skulls, newSkull)
     canShoot = false
   end
+
+  --Handles Restarting
+  if love.keyboard.isDown('r') and not(player.isAlive) then
+    player.isAlive = true
+    for i, enemy in ipairs(enemies) do
+      table.remove(enemies, i)
+      player.x = love.graphics:getWidth()/2
+      player.y = defaultY
+    end
+  end
+
 
   --Creating Enemies
   if createEnemy == true then
@@ -329,6 +338,12 @@ function love.update(dt)
   --End of Handling DX
   end
 
+  --This is run if the player is hit by an enemy
+  function death()
+    player.isAlive = false
+  end
+
+
 --COLLISION DETECTION
 
 --SKULLS & ENEMIES DETECTION
@@ -348,8 +363,7 @@ function love.update(dt)
       if ((enemy.x - player.x > -30) and (enemy.x - player.x < 80) and (player.y - enemy.y > -1*player.height + jumpHandicap) and (player.y - enemy.y < player.height- jumpHandicap)) then
         table.remove(enemies, i)
 
-        --Define a function and stuff that handles death
-
+        death()
         print("ZOINKS SCOOB")
       end
 
@@ -359,9 +373,7 @@ function love.update(dt)
       if ((enemy.x - player.x > -80) and (enemy.x - player.x < 30) and (player.y - enemy.y > -1*player.height + jumpHandicap) and (player.y - enemy.y < player.height- jumpHandicap)) then
         table.remove(enemies, i)
 
-        --Define a function and stuff that handles death
-
-
+        death()
         print("ZOINKS SCOOB")
       end
 
