@@ -35,6 +35,7 @@ createEnemyTimer = createEnemyTimerMax
 createEnemy = false
 
 jumpHandicap = 50
+enemyTurnDistance = 80
 
 function tablelength(T) -- Stolen code to find length of table
   local count = 0
@@ -274,7 +275,7 @@ function love.update(dt)
   end
 
 
-  function handleDx() --All the work involving the horizontal movement of everything
+  function handleMovement() --All the work involving the horizontal movement of everything
 
     if onGround() then -- WHEN ON THE GROUND
       if (dx < 0) and (dx + friction*dt < 0) then
@@ -296,6 +297,22 @@ function love.update(dt)
       end
     end
 
+
+    --"AI" turning if the the player is the opposite direction of movement
+    for i, enemy in ipairs(enemies) do
+      if enemy.dx < 0 then
+        if (player.x - enemy.x > enemyTurnDistance) then
+          enemy.dx = enemy.dx * -1
+          enemy.x = enemy.x - enemyRunImgs[1]:getWidth()
+        end
+      elseif enemy.dx > 0 then
+        if (player.x - enemy.x < -1*enemyTurnDistance) then
+          enemy.dx = enemy.dx * -1
+          enemy.x = enemy.x + enemyRunImgs[1]:getWidth()
+        end
+      end
+    end
+
     for i, skull in ipairs(skulls) do --handle skull Dx's
       skull.x = skull.x + skull.dx * dt
     end
@@ -303,6 +320,13 @@ function love.update(dt)
     for i, enemy in ipairs(enemies) do --handle enemy Dx's
       enemy.x = enemy.x + enemy.dx * dt
     end
+
+    --Updating the X and Y values of player with the dx and dy values
+    dy = dy + gravity*dt
+    player.x = player.x + dx*dt
+    player.y = player.y - dy*dt
+
+  --End of Handling DX
   end
 
 --COLLISION DETECTION
@@ -344,7 +368,7 @@ function love.update(dt)
     end
   end
 
---END OF COLLISION DETECTION
+  --END OF COLLISION DETECTION
 
   function removeSkulls() -- Handling the deletion of skulls off screen
 
@@ -358,16 +382,13 @@ function love.update(dt)
   end
 
   --Adjusting dx
-  handleDx()
+  handleMovement()
 
   --removing removeSkulls
   removeSkulls()
 
 
-  --Updating the X and Y values of player with the dx and dy values
-  dy = dy + gravity*dt
-  player.x = player.x + dx*dt
-  player.y = player.y - dy*dt
+
 
 
 
