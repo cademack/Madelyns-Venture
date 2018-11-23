@@ -189,6 +189,10 @@ end
 
 function love.update(dt)
 
+  --Handles the quitting of the game
+  if love.keyboard.isDown('escape') then
+    love.event.quit()
+  end
 
 
   --Rightward movement stuff
