@@ -37,6 +37,8 @@ createEnemy = false
 jumpHandicap = 50
 enemyTurnDistance = 80
 
+score = 0
+
 font = love.graphics.newFont("font.ttf", 64)
 
 function tablelength(T) -- Stolen code to find length of table
@@ -178,9 +180,12 @@ function love.draw()
 
   --Drawing death/respawn stuff
   if not(player.isAlive) then
-    love.graphics.print("Press R to Restart!", 50, 50, 0, 1, 1)
+    love.graphics.print("Press R to Restart!", 100, 200, 0, 1, 1)
   end
 
+
+  --Drawing score
+  love.graphics.print("Score: " .. score, love.graphics:getWidth() - 250, 100, 0, .5, .5)
 
 -- print() -- For debug reasons
 
@@ -257,6 +262,7 @@ function love.update(dt)
       table.remove(enemies, i)
       player.x = love.graphics:getWidth()/2
       player.y = defaultY
+      score = 0
     end
   end
 
@@ -352,6 +358,7 @@ function love.update(dt)
       if ((skull.x - enemy.x > -10) and (skull.x - enemy.x < 10) and (skull.y - enemy.y > -5) and (skull.y - enemy.y < 75)) then
         table.remove(skulls, i)
         table.remove(enemies, j)
+        score = score + 10
       end
     end
   end
